@@ -93,6 +93,7 @@ class Commander
             catch (err)
             {
                 message.channel.send(`:question: An error occured while running the command \`${commandName}\`: \`${err.message}\``);
+                console.error(err);
             }
         }
     }
