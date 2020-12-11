@@ -25,6 +25,7 @@ class Program
             },
             fetchAllMembers: true
         });
+        this.client.program = this;
         this.client.on('ready', this.onReady.bind(this));
         this.voice = new VoiceHandler(this.client, config.main_user_id);
         this.commander = new Commander({
