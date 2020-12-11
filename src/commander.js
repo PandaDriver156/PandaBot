@@ -39,8 +39,12 @@ class Commander
             if (!commandPath.endsWith('.js')) return;
             const command = require(path.join(this.path, commandPath));
             const commandName = command.info?.name || commandPath.slice(0, -3);
-            this.commands.set(commandName, command);
+            this.set(commandName, command);
         }
+    }
+
+    set(key, value) {
+        this.commands.set(key, value);
     }
 
     get(key)
@@ -63,6 +67,10 @@ class Commander
             if (cb(command)) return command;
         }
         return null;
+    }
+
+    delete(key) {
+        return this.commands.delete(key);
     }
 
     get count()
@@ -92,7 +100,7 @@ class Commander
             }
             catch (err)
             {
-                message.channel.send(`:question: An error occured while running the command \`${commandName}\`: \`${err.message}\``);
+                message.channel.send(`:question: An error occured while running the command.`);
                 console.error(err);
             }
         }
