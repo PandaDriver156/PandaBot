@@ -135,7 +135,7 @@ class VoiceHandler
             {
                 if (this.client.mainUser.id === u.id && u.voice.channel)
                 {
-                    await this.voice.joinChannel(u.voice.channelID);
+                    await this.joinChannel(u.voice.channelID);
                     break;
                 }
             };
@@ -144,7 +144,7 @@ class VoiceHandler
                 if (m.voice.channelID === g.me.voice.channelID)
                 {
                     if (m.voice.speaking)
-                        this.voice.setupUserStream(m);
+                        this.setupUserStream(m);
                 }
             });
         };
