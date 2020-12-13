@@ -15,6 +15,7 @@ class Program
                 intents: [
                     Intents.GUILDS,
                     Intents.GUILD_MEMBERS,
+                    Intents.GUILD_MESSAGE_REACTIONS,
                     Intents.GUILD_MESSAGES,
                     Intents.GUILD_PRESENCES,
                     Intents.GUILD_VOICE_STATES
@@ -23,7 +24,11 @@ class Program
             presence: {
                 status: 'invisible'
             },
-            fetchAllMembers: true
+            fetchAllMembers: true,
+            disableMentions: ['everyone'],
+            messageCacheMaxSize: 2,
+            messageCacheLifetime: 10,
+            messageSweepInterval: 60
         });
         this.client.program = this;
         this.client.on('ready', this.onReady.bind(this));
