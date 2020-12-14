@@ -53,6 +53,7 @@ exports.execute = async (message, args) =>
         case "load":
         case "restore":
             if (message.author.id !== message.guild.ownerID) return message.channel.send(":x: Only the owner of a server can restore a backup.");
+            if(!message.guild.me.permissions.has('ADMINISTRATOR')) return message.channel.send(":x: I need Administrator permissions to restore a backup.");
             const backup = args[1];
             let exists;
             exists = fs.existsSync("backups") && fs.existsSync(`backups/${backup}`);
@@ -131,6 +132,9 @@ async function restoreBackup(guild, backupHash, initiator)
     }
 
     // Restore roles and channels
+    /**
+     * @type {Object.<string, string>}
+     */
     const roleIDs = {};
     for (const role of data.roles.sort((a, b) => a.position < b.position ? 1 : -1))
     {
@@ -151,6 +155,26 @@ async function restoreBackup(guild, backupHash, initiator)
         await utility.wait(500);
     }
 
+    for (const member of data.members)
+    {
+        const guildMember = guild.members.cache.get(member.id);
+        if (!guildMember) continue;
+
+        if (member.nickname)
+            guildMember.setNickname(member.nickname).catch(() =>
+            {
+                if (!warnings.includes("nicknames"))
+                    warnings.push("nicknames");
+            });
+        if (member.roles.length)
+            await guildMember.roles.add(member.roles.filter(r => roleIDs[r] !== undefined).map(r => roleIDs[r])).catch(() =>
+            {
+                if (!warnings.includes("member roles"))
+                    warnings.push("member roles");
+            });
+        await utility.wait(500);
+    }
+
     const channelIDs = {};
     let firstChannelID;
 
@@ -161,12 +185,16 @@ async function restoreBackup(guild, backupHash, initiator)
         const createdChannel = await guild.channels.create(channel.name, {
             type: "category",
             position: 0,
-            permissionOverwrites: channel.permission_overwrites.map(o =>
-            {
-                if (o.id === data.id) o.id = guild.id;
-                else o.id = roleIDs[o.id];
-                return o;
-            })
+            permissionOverwrites: channel.permission_overwrites
+                .filter(ow => ow.id === data.id || roleIDs[ow.id] || guild.members.cache.has(ow.id))
+                .map(ow =>
+                {
+                    // the @everyone role has the same ID as the guild
+                    if (ow.id === data.id) ow.id = guild.id;
+                    else if (roleIDs[ow.id]) ow.id = roleIDs[ow.id];
+                    // If the overwrite is neither for @everyone nor a regular role, then it is for a specific user who is a member of the current guild (as filtered by .filer() above)
+                    return ow;
+                })
         });
         channelIDs[channel.id] = createdChannel.id;
         await utility.wait(500);
@@ -184,12 +212,16 @@ async function restoreBackup(guild, backupHash, initiator)
             rateLimitPerUser: channel.rateLimitPerUser,
             bitrate: channel.bitrate,
             userLimit: channel.userLimit,
-            permissionOverwrites: channel.permission_overwrites.map(o =>
-            {
-                if (o.id === data.id) o.id = guild.id;
-                else o.id = roleIDs[o.id];
-                return o;
-            })
+            permissionOverwrites: channel.permission_overwrites
+                .filter(ow => ow.id === data.id || roleIDs[ow.id] || guild.members.cache.has(ow.id))
+                .map(ow =>
+                {
+                    // the @everyone role has the same ID as the guild
+                    if (ow.id === data.id) ow.id = guild.id;
+                    else if (roleIDs[ow.id]) ow.id = roleIDs[ow.id];
+                    // If the overwrite is neither for @everyone nor a regular role, then it is for a specific user who is a member of the current guild (as filtered by .filer() above)
+                    return ow;
+                })
         });
         channelIDs[channel.id] = createdChannel.id;
         if (!firstChannelID && channel.type === "text") firstChannelID = createdChannel.id;
@@ -213,24 +245,6 @@ async function restoreBackup(guild, backupHash, initiator)
 
     if (guild.name !== data.name)
         await guild.setName(data.name);
-
-    for (const member of data.members)
-    {
-        const guildMember = guild.members.cache.get(member.id);
-        if (!guildMember) continue;
-
-        if (member.nickname) guildMember.setNickname(member.nickname).catch(() =>
-        {
-            if (!warnings.includes("nicknames"))
-                warnings.push("nicknames");
-        });
-        await guildMember.roles.add(member.roles).catch(() =>
-        {
-            if (!warnings.includes("member roles"))
-                warnings.push("member roles");
-        });
-        await utility.wait(500);
-    }
 
     const icon = fs.readdirSync(`backups/${backupHash}`)
         .find(f => f
