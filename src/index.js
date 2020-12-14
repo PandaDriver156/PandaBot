@@ -10,6 +10,7 @@ class Program
 {
     static Main()
     {
+        console.log("Starting...");
         this.client = new Discord.Client({
             ws: {
                 intents: [
@@ -25,14 +26,15 @@ class Program
                 status: 'invisible'
             },
             fetchAllMembers: true,
-            disableMentions: ['everyone'],
+            disableMentions: 'everyone',
             messageCacheMaxSize: 2,
             messageCacheLifetime: 10,
             messageSweepInterval: 60
         });
         this.client.program = this;
         this.client.on('ready', this.onReady.bind(this));
-        this.voice = new VoiceHandler(this.client, config.main_user_id);
+        if (config.track_voice)
+            this.voice = new VoiceHandler(this.client, config.main_user_id);
         this.commander = new Commander({
             client: this.client,
             prefix: config.prefix,
@@ -80,11 +82,15 @@ class Program
     {
         console.log("SIGINT signal.")
 
-        console.log("Closing all recording streams...");
-        for (const record in this.voice.records)
+        if (this.voice)
         {
-            record.voiceStream.destroy();
+            console.log("Closing all recording streams...");
+            for (const record in this.voice.records)
+            {
+                record.voiceStream.destroy();
+            }
         }
+
         console.log("Leaving all voice channels...");
         for (const [name, voice] of this.client.voice.connections)
         {

@@ -2,5 +2,6 @@
     "prefix": "p!",
     "main_user_id": "",
     "allowed_users": [],
-    "token": ""
+    "token": "",
+    "track_voice": true
 }
