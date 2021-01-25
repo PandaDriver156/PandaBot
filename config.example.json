@@ -1,7 +1,17 @@
 {
     "prefix": "p!",
-    "main_user_id": "",
-    "allowed_users": [],
     "token": "",
-    "track_voice": true
+    "track_voice": true,
+    "presence_check_interval": 10000,
+    "allowNotSpecifiedUsers": false,
+    "permLevels": {
+        "BotOwner": "",
+        "BotAdmin": []
+    },
+    "emojis": {
+        "online": ":green_circle:",
+        "offline": ":black_circle:",
+        "idle": ":orange_circle: ",
+        "dnd": ":red_circle: "
+    }
 }
