@@ -1,13 +1,16 @@
-const fs = require('fs');
-const dayjs = require('dayjs');
-const Discord = require('discord.js');
+import * as fs from "fs";
 
-class VoiceHandler
+import * as dayjs from "dayjs";
+import { Snowflake, GuildMember, VoiceChannel, VoiceState } from "discord.js";
+import { VoiceRecord } from "./types";
+import { Client } from "./client";
+
+export class VoiceManager
 {
-    /**
-     * @param {Discord.Client} client
-     */
-    constructor(client)
+    public records: Map<string, VoiceRecord>;
+    public client: Client;
+
+    constructor(client: Client)
     {
         this.records = new Map();
         this.client = client;
@@ -16,18 +19,11 @@ class VoiceHandler
         this.client.on('ready', this.onReady.bind(this));
     }
 
-    /**
-     * @param {Discord.Snowflake} channelID
-     * @returns {Promise<Discord.VoiceConnection>}
-     */
-    joinChannel(channelID)
+    joinChannel(channelID: Snowflake)
     {
         return new Promise((res, rej) =>
         {
-            /**
-             * @type {Discord.VoiceChannel}
-             */
-            const channel = this.client.channels.cache.get(channelID);
+            const channel = this.client.channels.cache.get(channelID) as VoiceChannel;
             channel.join().then(connection =>
             {
                 // Play a very short sound to make sure connection is setup, then mute
@@ -38,11 +34,7 @@ class VoiceHandler
         });
     }
 
-    /**
-     * @param {Discord.VoiceState} oldState
-     * @param {Discord.VoiceState} newState
-     */
-    async voiceStateChangeHandler(oldState, newState)
+    async voiceStateChangeHandler(oldState: VoiceState, newState: VoiceState)
     {
         const member = newState.member;
         const self = newState.guild.me;
@@ -53,7 +45,6 @@ class VoiceHandler
                 const oldKey = `${oldState.channelID}-${member.id}`;
                 if (this.records.has(oldKey))
                 {
-                    console.log("has key");
                     const oldRecord = this.records.get(oldKey);
                     oldRecord.voiceStream.destroy();
                     this.records.delete(oldKey);
@@ -70,7 +61,7 @@ class VoiceHandler
                 await this.joinChannel(newState.channelID);
 
                 if (member.voice.speaking)
-                    this.setupUserStream(member.id, member);
+                    this.setupUserStream(member);
             }
         }
 
@@ -80,10 +71,7 @@ class VoiceHandler
         }
     }
 
-    /**
-     * @param {Discord.GuildMember} spokenUser 
-     */
-    setupUserStream(spokenUser)
+    setupUserStream(spokenUser: GuildMember)
     {
         if (spokenUser.id === this.client.user.id) return;
         if (spokenUser.user.bot) return;
@@ -117,10 +105,7 @@ class VoiceHandler
 
     }
 
-    /**
-     * @param {Discord.GuildMember} member
-     */
-    onMemberSpeaking(member)
+    onMemberSpeaking(member: GuildMember)
     {
         if (!this.records.has(`${member.voice.channelID}-${member.id}`))
             this.setupUserStream(member);
@@ -150,5 +135,3 @@ class VoiceHandler
         };
     }
 }
-
-module.exports = VoiceHandler;

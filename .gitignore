@@ -4,6 +4,8 @@ node_modules/
 package-lock.json
 
 # PandaBot
-config.json
 backups/
+config.json
+data.db
+dist/
 records/

@@ -1,6 +1,5 @@
 const child_process = require('child_process');
 const fs = require('fs');
-const dayjs = require('dayjs');
 const ffmpegPath = require('ffmpeg-static');
 
 const recordsToConvert = process.argv.slice(2).length ? process.argv.slice(2)

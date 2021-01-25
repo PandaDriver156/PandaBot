@@ -1,11 +1,13 @@
 {
   "name": "PandaBot",
-  "version": "0.0.1",
-  "description": "Discord bot to gather information about servers.",
-  "main": "src/index.js",
+  "version": "0.1.0",
+  "description": "A utility bot that provides some useful tools.",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node .",
-    "convert": "node scripts/wavify.js"
+    "convert-audio": "node scripts/wavify.js",
+    "start": "npm run tsc && node .",
+    "tsc": "tsc",
+    "watch": "tsc --watch"
   },
   "engines": {
     "node": "14.x"
@@ -15,9 +17,16 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
+    "better-sqlite3": "^7.1.2",
     "dayjs": "^1.9.7",
     "discord.js": "^12.5.1",
     "ffmpeg-static": "^4.2.7",
     "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^5.4.1",
+    "@types/node-fetch": "^2.5.8",
+    "@types/ws": "^7.4.0",
+    "typescript": "^4.1.3"
   }
 }
