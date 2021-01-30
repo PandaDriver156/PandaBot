@@ -91,14 +91,12 @@ export class VoiceManager
         {
             if (!chunkReceived)
             {
-                console.log(`chunk - ${spokenUser.user.tag}`);
                 chunkReceived = true;
             }
             writeStream.write(chunk);
         });
         voiceStream.on('end', () =>
         {
-            console.log("End");
             writeStream.end();
             this.records.delete(`${self.voice.channelID}-${spokenUser.id}`);
         });
