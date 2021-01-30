@@ -4,6 +4,7 @@
     "track_voice": true,
     "presence_check_interval": 10000,
     "allowNotSpecifiedUsers": false,
+    "presence": "online",
     "permLevels": {
         "BotOwner": "",
         "BotAdmin": []
