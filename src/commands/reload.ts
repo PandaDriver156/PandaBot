@@ -1,9 +1,8 @@
 import * as fs from "fs";
-import { AccessLevels, BaseCommand, Message } from "../types"
+import { AccessLevels, BaseCommand } from "../types"
 
-export default class ReloadCommand implements BaseCommand
-{
-    async execute(message: Message, args: string[])
+const command: BaseCommand = {
+    async execute(message, args)
     {
         const { commander } = message.client;
         let commandName = args[0];
@@ -30,15 +29,17 @@ export default class ReloadCommand implements BaseCommand
 
         commander.delete(commandName);
         const imported = await import(`./${commandName}.js`);
-        command = imported.default ? new imported.default() : new imported();
+        command = imported.default ? imported.default : imported;
         commander.set(commandName, command);
 
         if (isNewCommand) message.channel.send(`:white_check_mark: Command \`${commandName}\` was loaded.`);
         else message.channel.send(`:arrows_counterclockwise: Command \`${commandName}\` was reloaded.`);
-    }
+    },
 
-    info = {
+    info: {
         aliases: ["load"],
         level: AccessLevels.BotModerator
     }
 };
+
+export default command;

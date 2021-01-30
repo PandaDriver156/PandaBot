@@ -1,11 +1,10 @@
 import * as fs from "fs";
 import { CollectorFilter, Guild, GuildMember, TextChannel } from "discord.js";
 import * as utility from "../utility";
-import { AccessLevels, BaseCommand, Message } from "../types";
+import { AccessLevels, BaseCommand } from "../types";
 
-export default class BackupCommand implements BaseCommand
-{
-    async execute(message: Message, args: string[])
+export const command: BaseCommand = {
+    async execute(message, args) 
     {
         const action = args[0];
         switch (action)
@@ -95,12 +94,11 @@ export default class BackupCommand implements BaseCommand
                 message.channel.send(":x: Valid actions: create, load");
                 break;
         }
-    };
-
-    info = {
+    },
+    info: {
         level: AccessLevels.ServerOwner
-    };
-}
+    }
+};
 
 async function restoreBackup(guild: Guild, backupHash: string, initiator: GuildMember)
 {
@@ -249,4 +247,6 @@ async function restoreBackup(guild: Guild, backupHash: string, initiator: GuildM
 
     notifyChannel.send(":white_check_mark: Backup restored!");
     if (warnings.length) notifyChannel.send(`:warning: __Warnings__: \n${warnings.map(w => '\t- Some ' + w + " couldn't be restored").join('\n')}`);
-}
+};
+
+export default command;

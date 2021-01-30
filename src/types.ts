@@ -29,17 +29,28 @@ export interface PresenceData
 
 export interface UserTrack
 {
-    user_id: Discord.Snowflake,
-    channel_id: Discord.Snowflake,
-    last_presence: PresenceData
+    guild: Discord.Snowflake,
+    user: Discord.Snowflake,
+    channel: Discord.Snowflake,
+    last_presence: PresenceData,
+    last_fake_offline_at: Date
+}
+
+export interface FakeOfflineInfo
+{
+    channel: Discord.ChannelResolvable,
+    user: Discord.UserResolvable,
+    action: string,
+    extraInfo?: string[]
 }
 
 export const Colors = {
     lightBlue: 65524,
+    green: 5563764,
     red: 15544872
 }
 
-export class BaseCommand
+export interface BaseCommand
 {
     execute: (message: Message, args: string[]) => void;
     info: {
@@ -52,21 +63,22 @@ export class BaseCommand
 export interface Config
 {
     prefix: string;
-    token: string
-    track_voice: boolean,
-    presence_check_interval: number,
-    allowNotSpecifiedUsers: boolean,
+    token: string;
+    track_voice: boolean;
+    presence_check_interval: number;
+    allowNotSpecifiedUsers: boolean;
+    presence: Discord.PresenceStatusData | null;
     permLevels: {
         [key in Exclude<keyof typeof AccessLevels, "BotOwner">]: Discord.Snowflake[];
     } & {
         BotOwner: Discord.Snowflake;
-    },
+    };
     emojis: {
         online: string,
         offline: string,
         idle: string,
         dnd: string
-    }
+    };
 }
 
 export class GuildMember extends Discord.GuildMember

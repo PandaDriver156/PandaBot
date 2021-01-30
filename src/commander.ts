@@ -4,14 +4,6 @@ import { BaseCommand, AccessLevels, GuildMember, Message } from "./types";
 import { Client, } from "./client"
 import { Snowflake } from "discord.js";
 
-export interface CommanderOptions
-{
-    client: Client,
-    prefix: string,
-    path: string,
-    allowBots: boolean
-}
-
 export const permLevelChecks =
     [
         {
@@ -85,6 +77,15 @@ export function checkUserLevel(user: GuildMember)
     return highestLevel;
 }
 
+export interface CommanderOptions
+{
+    client: Client,
+    prefix: string,
+    path: string,
+    allowBots?: boolean,
+    autoHandleMessages?: boolean
+}
+
 export class Commander
 {
     public client: Client;
@@ -101,12 +102,14 @@ export class Commander
         this.path = options.path;
         this.allowBots = options.allowBots != undefined ? options.allowBots : false;
         this.commands = new Map();
+        options.autoHandleMessages = options.autoHandleMessages != undefined ? options.autoHandleMessages : true;
 
-        this.client.on('message', this.handleMessage.bind(this));
+        if (options.autoHandleMessages)
+            this.client.on('message', this.handleMessage.bind(this));
         this.load();
     }
 
-    async load()
+    private async load()
     {
         const commands = fs.readdirSync(this.path);
 
@@ -116,8 +119,7 @@ export class Commander
             {
                 if (!commandPath.endsWith('.js')) return;
                 const commandImport = await import(path.join(this.path, commandPath));
-                const commandClass: typeof BaseCommand = commandImport.default ? commandImport.default : commandImport;
-                const command = new commandClass();
+                const command: BaseCommand = commandImport.default ? commandImport.default : commandImport;
                 const commandName = command.info?.name || commandPath.slice(0, -3);
                 this.set(commandName, command);
             } catch (error)
@@ -128,7 +130,7 @@ export class Commander
         }
     }
 
-    handleMessage(message: Message)
+    public handleMessage(message: Message)
     {
         if (!message.content.startsWith(this.prefix)) return;
         if (message.author.bot && !this.allowBots) return;
